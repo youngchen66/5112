@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>英語句型拼拼看</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f8ff;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    .sentence-box {
+      margin: 20px 0;
+      padding: 20px;
+      background-color: #fff;
+      border: 2px dashed #ccc;
+      min-height: 60px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .word {
+      background-color: #e6f7ff;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 8px;
+      cursor: grab;
+      user-select: none;
+      font-size: 18px;
+    }
+    .word.dragging {
+      opacity: 0.5;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #translation {
+      margin-top: 10px;
+      color: #555;
+    }
+    #image {
+      margin-top: 20px;
+      max-width: 400px;
+    }
+    #score-display {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>英語句型拼拼看</h1>
+  <button onclick="startGame()">🎮 開始遊戲</button>
+  <h3 id="question-counter"></h3>
+  <div id="score-display"></div>
+  <div id="sentence-box" class="sentence-box"></div>
+  <div id="word-bank" class="sentence-box"></div>
+  <button onclick="checkSentence()">確認句子</button>
+  <button onclick="loadNextQuestion()" disabled>下一題</button>
+  <div id="result"></div>
+  <div id="translation"></div>
+  <img id="image" src="" alt="" />
+
+  <script>
+    const questions = [
+      { sentence: ["The", "boy", "is", "playing", "soccer", "in", "the", "park"], translation: "這個男孩正在公園踢足球。", image: "images/boy_soccer.png" },
+      { sentence: ["She", "is", "reading", "a", "book", "at", "school"], translation: "她正在學校讀書。", image: "images/girl_reading.png" },
+      { sentence: ["The", "cat", "is", "on", "the", "roof"], translation: "貓在屋頂上。", image: "images/cat_roof.png" },
+      { sentence: ["We", "are", "having", "fun", "at", "the", "zoo"], translation: "我們在動物園玩得很開心。", image: "images/zoo_fun.png" },
+      { sentence: ["Dad", "is", "cooking", "dinner", "in", "the", "kitchen"], translation: "爸爸正在廚房煮晚餐。", image: "images/dad_cooking.png" },
+      { sentence: ["I", "saw", "a", "rainbow", "in", "the", "sky"], translation: "我看到天上有彩虹。", image: "images/rainbow.png" },
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let gameStarted = false;
+
+    const sentenceBox = document.getElementById('sentence-box');
+    const wordBank = document.getElementById('word-bank');
+    const result = document.getElementById('result');
+    const translation = document.getElementById('translation');
+    const counter = document.getElementById('question-counter');
+    const image = document.getElementById('image');
+    const scoreDisplay = document.getElementById('score-display');
+    const nextBtn = document.querySelector('button[onclick="loadNextQuestion()"]');
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function createWordElement(word) {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = word;
+      span.draggable = true;
+
+      span.addEventListener('dragstart', e => {
+        span.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', word);
+      });
+
+      span.addEventListener('dragend', () => {
+        span.classList.remove('dragging');
+      });
+
+      return span;
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const dragging = document.querySelector('.word.dragging');
+      if (dragging && !sentenceBox.contains(dragging)) {
+        sentenceBox.appendChild(dragging);
+      }
+    }
+
+    sentenceBox.addEventListener('dragover', e => e.preventDefault());
+    sentenceBox.addEventListener('drop', handleDrop);
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function loadQuestion(index) {
+      sentenceBox.innerHTML = '';
+      wordBank.innerHTML = '';
+      result.textContent = '';
+      nextBtn.disabled = true;
+
+      const question = questions[index];
+      translation.textContent = question.translation;
+      image.src = question.image || '';
+      image.alt = question.translation;
+
+      const words = Array.isArray(question.sentence)
+        ? [...question.sentence]
+        : question.sentence.split(' ');
+
+      shuffle(words);
+      words.forEach(word => wordBank.appendChild(createWordElement(word)));
+
+      counter.textContent = `第 ${index + 1} 題 / 共 ${questions.length} 題`;
+      const speech = Array.isArray(question.sentence)
+        ? question.sentence.join(' ')
+        : question.sentence;
+      speak(speech);
+    }
+
+    function checkSentence() {
+      const userSentence = Array.from(sentenceBox.children).map(el => el.textContent);
+      const correct = questions[currentQuestionIndex].sentence;
+      const correctArray = Array.isArray(correct) ? correct : correct.split(' ');
+
+      if (JSON.stringify(userSentence) === JSON.stringify(correctArray)) {
+        result.textContent = '🎉 答對了！';
+        result.style.color = 'green';
+        score++;
+        updateScore();
+        nextBtn.disabled = false;
+      } else {
+        result.textContent = '❌ 答錯了，請再試一次。';
+        result.style.color = 'red';
+      }
+    }
+
+    function loadNextQuestion() {
+      currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+      loadQuestion(currentQuestionIndex);
+    }
+
+    function updateScore() {
+      scoreDisplay.textContent = `目前答對題數：${score} 題`;
+    }
+
+    function startGame() {
+      score = 0;
+      currentQuestionIndex = 0;
+      gameStarted = true;
+      updateScore();
+      loadQuestion(currentQuestionIndex);
+    }
+  </script>
+</body>
+</html>
