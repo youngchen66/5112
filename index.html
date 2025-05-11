@@ -2,9 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>英語句型拼拼樂</title>
-   <title>高師大113組發班第五組</title>
-   <title>指導教授:李百麟</title>
+  <title>英語句型拼拼看</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -71,24 +69,24 @@
   <div id="sentence-box" class="sentence-box"></div>
   <div id="word-bank" class="sentence-box"></div>
   <button onclick="checkSentence()">確認句子</button>
-  <button onclick="loadNextQuestion()" disabled>下一題</button>
+  <button onclick="loadNextQuestion()">下一題</button>
   <div id="result"></div>
   <div id="translation"></div>
   <img id="image" src="" alt="" />
 
   <script>
-    const questions = [
+    const originalQuestions = [
       { sentence: ["The", "boy", "is", "playing", "soccer", "in", "the", "park"], translation: "這個男孩正在公園踢足球。", image: "images/boy_soccer.png" },
       { sentence: ["She", "is", "reading", "a", "book", "at", "school"], translation: "她正在學校讀書。", image: "images/girl_reading.png" },
       { sentence: ["The", "cat", "is", "on", "the", "roof"], translation: "貓在屋頂上。", image: "images/cat_roof.png" },
       { sentence: ["We", "are", "having", "fun", "at", "the", "zoo"], translation: "我們在動物園玩得很開心。", image: "images/zoo_fun.png" },
       { sentence: ["Dad", "is", "cooking", "dinner", "in", "the", "kitchen"], translation: "爸爸正在廚房煮晚餐。", image: "images/dad_cooking.png" },
-      { sentence: ["I", "saw", "a", "rainbow", "in", "the", "sky"], translation: "我看到天上有彩虹。", image: "images/rainbow.png" },
+      { sentence: ["I", "saw", "a", "rainbow", "in", "the", "sky"], translation: "我看到天上有彩虹。", image: "images/rainbow.png" }
     ];
 
+    let questions = [];
     let currentQuestionIndex = 0;
     let score = 0;
-    let gameStarted = false;
 
     const sentenceBox = document.getElementById('sentence-box');
     const wordBank = document.getElementById('word-bank');
@@ -97,7 +95,6 @@
     const counter = document.getElementById('question-counter');
     const image = document.getElementById('image');
     const scoreDisplay = document.getElementById('score-display');
-    const nextBtn = document.querySelector('button[onclick="loadNextQuestion()"]');
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -142,41 +139,43 @@
     }
 
     function loadQuestion(index) {
+      if (index >= questions.length) {
+        sentenceBox.innerHTML = '';
+        wordBank.innerHTML = '';
+        image.src = '';
+        translation.textContent = '';
+        counter.textContent = '🎉 遊戲結束 🎉';
+        result.textContent = `你總共答對了 ${score} / ${questions.length} 題！`;
+        result.style.color = 'blue';
+        return;
+      }
+
       sentenceBox.innerHTML = '';
       wordBank.innerHTML = '';
       result.textContent = '';
-      nextBtn.disabled = true;
 
       const question = questions[index];
       translation.textContent = question.translation;
       image.src = question.image || '';
       image.alt = question.translation;
 
-      const words = Array.isArray(question.sentence)
-        ? [...question.sentence]
-        : question.sentence.split(' ');
-
+      const words = [...question.sentence];
       shuffle(words);
       words.forEach(word => wordBank.appendChild(createWordElement(word)));
 
       counter.textContent = `第 ${index + 1} 題 / 共 ${questions.length} 題`;
-      const speech = Array.isArray(question.sentence)
-        ? question.sentence.join(' ')
-        : question.sentence;
-      speak(speech);
+      speak(question.sentence.join(' '));
     }
 
     function checkSentence() {
       const userSentence = Array.from(sentenceBox.children).map(el => el.textContent);
       const correct = questions[currentQuestionIndex].sentence;
-      const correctArray = Array.isArray(correct) ? correct : correct.split(' ');
 
-      if (JSON.stringify(userSentence) === JSON.stringify(correctArray)) {
+      if (JSON.stringify(userSentence) === JSON.stringify(correct)) {
         result.textContent = '🎉 答對了！';
         result.style.color = 'green';
         score++;
         updateScore();
-        nextBtn.disabled = false;
       } else {
         result.textContent = '❌ 答錯了，請再試一次。';
         result.style.color = 'red';
@@ -184,7 +183,7 @@
     }
 
     function loadNextQuestion() {
-      currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+      currentQuestionIndex++;
       loadQuestion(currentQuestionIndex);
     }
 
@@ -195,7 +194,8 @@
     function startGame() {
       score = 0;
       currentQuestionIndex = 0;
-      gameStarted = true;
+      questions = [...originalQuestions];
+      shuffle(questions); // 題目順序亂數化
       updateScore();
       loadQuestion(currentQuestionIndex);
     }
