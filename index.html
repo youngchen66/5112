@@ -51,8 +51,9 @@
       color: #555;
     }
     #image {
-      margin-top: 20px;
+      margin: 20px auto;
       max-width: 400px;
+      display: block;
     }
     #score-display {
       margin-top: 10px;
@@ -63,95 +64,34 @@
 </head>
 <body>
   <h1>英語句型拼拼看</h1>
-  <button onclick="startGame()">🎮 開始遊戲</button>
-  <h3 id="question-counter"></h3>
-  <div id="score-display"></div>
-  <div id="sentence-box" class="sentence-box"></div>
-  <div id="word-bank" class="sentence-box"></div>
-  <button onclick="checkSentence()">確認句子</button>
-  <button onclick="loadNextQuestion()">下一題</button>
-  <div id="result"></div>
-  <div id="translation"></div>
+  <!-- 顯示圖片移到上方 -->
   <img id="image" src="" alt="" />
+  <!-- 顯示目前題數 -->
+  <h3 id="question-counter"></h3>
+  <!-- 顯示目前分數 -->
+  <div id="score-display"></div>
+  <!-- 使用者拼句子框 -->
+  <div id="sentence-box" class="sentence-box"></div>
+  <!-- 單字選擇區 -->
+  <div id="word-bank" class="sentence-box"></div>
+  <!-- 顯示答題結果 -->
+  <div id="result"></div>
+  <!-- 顯示中文翻譯 -->
+  <div id="translation"></div>
+  <!-- 所有按鈕統一移到下方 -->
+  <div style="margin-top: 30px;">
+    <button onclick="startGame()">🎮 開始遊戲</button>
+    <button onclick="checkSentence()">確認句子</button>
+    <button onclick="loadNextQuestion()">下一題</button>
+  </div>
 
   <script>
+    // 原始題庫（請擴增至100題）
     const originalQuestions = [
-      // 請在此擴增至100題，範例如下：
       { sentence: ["Stand", "up", "please"], translation: "請站起來。", image: "images/stand_up.png" },
       { sentence: ["Sit", "down", "please"], translation: "請坐下。", image: "images/sit_down.png" },
       { sentence: ["May", "I", "go", "to", "the", "bathroom", "please"], translation: "請問我可以去洗手間嗎？", image: "images/go_bathroom.png" },
-      { sentence: ["Can", "I", "drink", "some", "water", "please"], translation: "請問我可以喝水嗎？", image: "images/drink_water.png" },
-      { sentence: ["She", "found", "a", "coin", "on", "the", "floor"], hint: "她在地上撿到一枚硬幣", img: "images/q131.jpg" },
-      { sentence: ["She", "likes", "to", "ride", "her", "bike", "every", "day"], translation: "她每天喜歡騎腳踏車。", image: "girl_bike.png" },
-       { sentence: ["Stand", "up", "please"], translation: "請站起來。", image: "images/stand_up.png" },
-  { sentence: ["Sit", "down", "please"], translation: "請坐下。", image: "images/sit_down.png" },
-  { sentence: ["May", "I", "go", "to", "the", "bathroom", "please"], translation: "請問我可以去洗手間嗎？", image: "images/go_bathroom.png" },
-  { sentence: ["Can", "I", "drink", "some", "water", "please"], translation: "請問我可以喝水嗎？", image: "images/drink_water.png" },
-  { sentence: ["This", "is", "my", "pencil"], translation: "這是我的鉛筆。", image: "images/pencil.png" },
-  { sentence: ["What", "color", "is", "your", "bag"], translation: "你的書包是什麼顏色？", image: "images/bag_color.png" },
-  { sentence: ["I", "have", "a", "new", "notebook"], translation: "我有一本新筆記本。", image: "images/notebook.png" },
-  { sentence: ["He", "is", "my", "father"], translation: "他是我爸爸。", image: "images/father.png" },
-  { sentence: ["She", "is", "my", "sister"], translation: "她是我姊姊。", image: "images/sister.png" },
-  { sentence: ["The", "cat", "is", "under", "the", "table"], translation: "貓在桌子底下。", image: "images/cat_table.png" },
-  { sentence: ["It", "is", "sunny", "today"], translation: "今天天氣晴朗。", image: "images/sunny.png" },
-  { sentence: ["It", "is", "raining", "now"], translation: "現在正在下雨。", image: "images/raining.png" },
-  { sentence: ["Do", "you", "like", "apples"], translation: "你喜歡蘋果嗎？", image: "images/apple.png" },
-  { sentence: ["Yes", "I", "do"], translation: "是的，我喜歡。", image: "images/yes.png" },
-  { sentence: ["No", "I", "don't"], translation: "不，我不喜歡。", image: "images/no.png" },
-  { sentence: ["I", "am", "ten", "years", "old"], translation: "我十歲。", image: "images/ten_years.png" },
-  { sentence: ["Today", "is", "Monday"], translation: "今天是星期一。", image: "images/monday.png" },
-  { sentence: ["We", "have", "PE", "class", "today"], translation: "我們今天有體育課。", image: "images/pe_class.png" },
-  { sentence: ["What", "do", "you", "see"], translation: "你看到了什麼？", image: "images/see.png" },
-  { sentence: ["I", "see", "a", "bird"], translation: "我看到一隻鳥。", image: "images/bird.png" },
-  { sentence: ["I", "like", "to", "ride", "a", "bike"], translation: "我喜歡騎腳踏車。", image: "images/ride_bike.png" },
-  { sentence: ["Let's", "play", "basketball", "after", "school"], translation: "放學後我們來打籃球吧。", image: "images/play_basketball.png" },
-  { sentence: ["My", "mother", "is", "a", "teacher"], translation: "我媽媽是老師。", image: "images/mother_teacher.png" },
-  { sentence: ["We", "are", "going", "to", "the", "zoo", "tomorrow"], translation: "我們明天要去動物園。", image: "images/zoo.png" },
-  { sentence: ["There", "is", "a", "book", "on", "the", "desk"], translation: "書桌上有一本書。", image: "images/book_desk.png" },
-  { sentence: ["How", "old", "are", "you"], translation: "你幾歲？", image: "images/how_old.png" },
-  { sentence: ["I", "am", "happy", "today"], translation: "我今天很開心。", image: "images/happy.png" },
-  { sentence: ["We", "have", "lunch", "at", "noon"], translation: "我們中午吃午餐。", image: "images/lunch.png" },
-  { sentence: ["My", "brother", "can", "swim", "well"], translation: "我哥哥游泳很厲害。", image: "images/swim.png" },
-  { sentence: ["They", "are", "playing", "in", "the", "park"], translation: "他們正在公園玩。", image: "images/park.png" },
-  { sentence: ["Is", "this", "your", "bag"], translation: "這是你的書包嗎？", image: "images/your_bag.png" },
-  { sentence: ["This", "is", "my", "favorite", "toy"], translation: "這是我最喜歡的玩具。", image: "images/toy.png" },
-  { sentence: ["My", "dog", "is", "very", "cute"], translation: "我的狗很可愛。", image: "images/cute_dog.png" },
-  { sentence: ["He", "is", "watching", "TV"], translation: "他正在看電視。", image: "images/watch_tv.png" },
-  { sentence: ["She", "is", "doing", "her", "homework"], translation: "她正在寫作業。", image: "images/homework.png" },
-  { sentence: ["Do", "you", "want", "some", "juice"], translation: "你想喝果汁嗎？", image: "images/juice.png" },
-  { sentence: ["I", "have", "a", "cold"], translation: "我感冒了。", image: "images/cold.png" },
-  { sentence: ["It's", "hot", "outside"], translation: "外面很熱。", image: "images/hot.png" },
-  { sentence: ["She", "has", "a", "pink", "skirt"], translation: "她有一件粉紅色的裙子。", image: "images/skirt.png" },
-  { sentence: ["The", "apple", "is", "red"], translation: "蘋果是紅色的。", image: "images/red_apple.png" },
-  { sentence: ["The", "sun", "is", "yellow"], translation: "太陽是黃色的。", image: "images/yellow_sun.png" },
-  { sentence: ["My", "shoes", "are", "blue"], translation: "我的鞋子是藍色的。", image: "images/blue_shoes.png" },
-  { sentence: ["I", "am", "hungry"], translation: "我餓了。", image: "images/hungry.png" },
-  { sentence: ["Let's", "go", "to", "the", "library"], translation: "我們去圖書館吧。", image: "images/library.png" },
-  { sentence: ["We", "read", "books", "in", "the", "library"], translation: "我們在圖書館看書。", image: "images/read_books.png" },
-  { sentence: ["The", "moon", "is", "white"], translation: "月亮是白色的。", image: "images/moon.png" },
-  { sentence: ["It's", "windy", "today"], translation: "今天有風。", image: "images/windy.png" },
-  { sentence: ["The", "children", "are", "singing"], translation: "小朋友們正在唱歌。", image: "images/singing.png" },
-  { sentence: ["Let's", "have", "fun"], translation: "我們來玩得開心一點！", image: "images/have_fun.png" },
-  { sentence: ["I", "am", "tired"], translation: "我累了。", image: "images/tired.png" },
-  { sentence: ["The", "dog", "is", "sleeping"], translation: "狗在睡覺。", image: "images/sleeping_dog.png" },
-  { sentence: ["I", "brush", "my", "teeth"], translation: "我刷牙。", image: "images/brush_teeth.png" },
-  { sentence: ["We", "go", "to", "school", "by", "bus"], translation: "我們搭公車上學。", image: "images/go_by_bus.png" },
-  { sentence: ["He", "has", "a", "baseball"], translation: "他有一顆棒球。", image: "images/baseball.png" },
-  { sentence: ["My", "grandpa", "likes", "tea"], translation: "我爺爺喜歡喝茶。", image: "images/tea.png" },
-  { sentence: ["Do", "you", "like", "dancing"], translation: "你喜歡跳舞嗎？", image: "images/dancing.png" },
-  { sentence: ["We", "are", "drawing", "a", "picture"], translation: "我們正在畫圖。", image: "images/drawing.png" },
-  { sentence: ["I", "can", "ride", "a", "horse"], translation: "我會騎馬。", image: "images/horse.png" },
-  { sentence: ["She", "can", "sing", "well"], translation: "她很會唱歌。", image: "images/sing.png" },
-  { sentence: ["It's", "cold", "today"], translation: "今天很冷。", image: "images/cold_weather.png" },
-  { sentence: ["I", "like", "my", "English", "class"], translation: "我喜歡我的英文課。", image: "images/english_class.png" },
-  { sentence: ["Let's", "make", "a", "snowman"], translation: "我們來堆雪人吧。", image: "images/snowman.png" },
-  { sentence: ["It's", "time", "to", "go", "home"], translation: "該回家了。", image: "images/go_home.png" },
-  { sentence: ["Do", "you", "have", "a", "pet"], translation: "你有養寵物嗎？", image: "images/pet.png" },
-  { sentence: ["Yes", "I", "have", "a", "rabbit"], translation: "是的，我養一隻兔子。", image: "images/rabbit.png" },
-  { sentence: ["Let's", "go", "shopping"], translation: "我們去逛街吧。", image: "images/shopping.png" },
-  { sentence: ["Do", "you", "like", "music"], translation: "你喜歡音樂嗎？", image: "images/music.png" }
-
-      // ...... (請補充共100題，混合中高年級句型)
+      { sentence: ["Can", "I", "drink", "some", "water", "please"], translation: "請問我可以喝水嗎？", image: "images/drink_water.png" }
     ];
 
     let questions = [];
@@ -265,7 +205,7 @@
       score = 0;
       currentQuestionIndex = 0;
       questions = [...originalQuestions];
-      shuffle(questions); // 題目順序亂數化
+      shuffle(questions);
       updateScore();
       loadQuestion(currentQuestionIndex);
     }
